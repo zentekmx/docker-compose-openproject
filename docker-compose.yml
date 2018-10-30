@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  openldap:
+    image: zentekmx/openldap:latest
+    container_name: openldap.project
+    ports:
+    - "389:389"
+    volumes:
+    - ldap-volume:/var/lib/ldap:Z
+
+  memcached:
+    image: memcached:latest
+    container_name: memcached.project
+
+  postgres:
+    image: postgres:10.1
+    container_name: postgres.project
+    volumes:
+    - db-volume:/var/lib/postgresql/data:Z
+    environment:
+    - POSTGRES_USER=ztadmin
+    - POSTGRES_PASSWORD=secret
+    - POSTGRES_DB=openprojectdb
+
+  openproject:
+    image: openproject/community:7
+    container_name: openproject.project
+    depends_on:
+    - openldap
+    - memcached
+    - postgres
+    ports:
+    - "80:80"
+    volumes:
+      - app-volume:/var/db/openproject:Z
+    environment:
+    - DATABASE_URL=postgres://ztadmin:secret@postgres:5432/openprojectdb?pool=10&encoding=utf8&timeout=5000&reconnect=true
+    - SECRET_KEY_BASE=youshouldoverwritethiswithsomethingelse
+    - CACHE_MEMCACHE_SERVER=memcached
+    - CACHE_NAMESPACE=openproject
+    - EMAIL_DELIVERY_METHOD=smtp
+
+volumes:
+    ldap-volume:
+    db-volume:
+    app-volume:
+
