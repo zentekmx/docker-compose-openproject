@@ -1,2 +1,2 @@
 # docker-compose-openproject
-Docker compose for metabase at https://www.openproject.org/
+Docker compose for openproject at https://www.openproject.org/
